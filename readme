@@ -1,0 +1,13 @@
+   /*  stage('Test') {
+            agent any
+            steps {
+                echo 'This is a test step'
+            }
+        }
+
+        stage('Deploy') {
+            agent any
+            steps {
+                echo 'This is a deploy step'
+            }
+        } */

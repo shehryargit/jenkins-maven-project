@@ -5,21 +5,12 @@ pipeline {
         stage('Build') {
             agent any
             steps {
-                echo 'This is a build step'
+                sh 'mvn clean package'
             }
-        }
-
-        stage('Test') {
-            agent any
-            steps {
-                echo 'This is a test step'
-            }
-        }
-
-        stage('Deploy') {
-            agent any
-            steps {
-                echo 'This is a deploy step'
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/target/*.war'
+                }
             }
         }
     }
