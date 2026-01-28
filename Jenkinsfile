@@ -1,16 +1,17 @@
 pipeline {
     agent {label 'server1'}
+    environment {
+        FIRST_NAME = 'Shehryar'
+    }
+    parameters {
+        string(name: 'LAST_NAME', defaultValue: 'Shah')
+    }
     tools {maven 'maven'}
     stages {
         stage('build') {
             steps {
                 sh 'mvn clean package'
-            }
-        }
-        stage ('test') {
-            steps {
-                echo 'Running tests'
-                sh 'mvn test'
+                echo "Hello my name is $FIRST_NAME ${params.LAST_NAME}"
             }
         }
     }
