@@ -11,7 +11,7 @@ pipeline {
         stage('build') {
             steps {
                 sh 'mvn clean package'
-                echo "Hello my name is $FIRST_NAME ${params.LAST_NAME}"
+                echo "Hello my name is ${env.FIRST_NAME} ${params.LAST_NAME}"
             }
         }
         stage('test') {
