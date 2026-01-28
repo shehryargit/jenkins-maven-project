@@ -14,6 +14,20 @@ pipeline {
                 echo "Hello my name is $FIRST_NAME ${params.LAST_NAME}"
             }
         }
+        stage('test') {
+            parallel {
+                stage ('Test A') {
+                    steps {
+                        echo 'Running test A'
+                    }
+                }
+                stage ('Test B'){
+                    steps {
+                        echo 'Running test B'
+                    }
+                }
+            }
+        }
     }
     post {
         success {
