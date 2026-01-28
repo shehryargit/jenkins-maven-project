@@ -1,58 +1,68 @@
 pipeline {
-    agent {label 'server1'}
+    agent { label 'server1' }           // default agent for most stages
+
     environment {
         FIRST_NAME = 'Shehryar'
     }
+
     parameters {
-        choice choices: ['dev'], name : select_environment 
+        choice(
+            choices: ['dev'], 
+            name: 'select_environment',
+            description: 'Choose target environment'
+        )
     }
-    tools {maven 'maven'}
+
+    tools {
+        maven 'maven'
+    }
+
     stages {
-        stage('build') {
+        stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests=true'
             }
         }
-        stage('test') {
+
+        stage('Test') {
             parallel {
-                agent {label 'server2'}
-                stage ('Test A') {
+                stage('Test A') {
+                    agent { label 'server1' }   // ← correct place for agent
                     steps {
-                        echo 'Running test A'
+                        echo 'Running test A on server1'
                         sh 'mvn test'
                     }
                 }
-                agent {label 'server3'}
-                stage ('Test B'){
+                stage('Test B') {
+                    agent { label 'server1' }   // ← correct place for agent
                     steps {
-                        echo 'Running test B'
+                        echo 'Running test B on server1'
                         sh 'mvn test'
                     }
                 }
             }
-            }
-    post {
-        success {
-            dir('webapp/target/') {
-                stash name: 'maven-build', includes: '*.war'
-            }
         }
-    }
-    stage('deploy') {
-        when {expression {params.select_environment == 'dev'}
-        beforeAgent true
-        agent {label 'server1'}
-        steps {
-            dir('var/www/html') {
-                unstash 'maven-build'
+
+        stage('Deploy') {
+            when {
+                expression { params.select_environment == 'dev' }
             }
-            sh """
-            cd /var/www/html
-            jar -xvf  webapp.jar
-            """
-        }
+            agent { label 'server1' }           // explicit agent (optional if same as top-level)
+            steps {
+                dir('webapp/target') {
+                    stash name: 'maven-build', includes: '*.war'
+                }
+                dir('/var/www/html') {
+                    unstash 'maven-build'
+                    echo 'Deployed webapp.war to /var/www/html – restart your server if needed'
+                }
+            }
         }
     }
 
+    post {
+        success {
+            echo "Build & Deploy succeeded for ${env.FIRST_NAME}"
         }
+    }
 }
