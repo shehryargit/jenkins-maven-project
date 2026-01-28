@@ -1,21 +1,22 @@
 pipeline {
-    agent {
-        label 'server1'
-    }
-    tools {
-        maven 'maven'
-    }
-
+    agent {label 'server1'}
+    tools {maven 'maven'}
     stages {
-        stage('Build') {
+        stage('build') {
             steps {
                 sh 'mvn clean package'
             }
-            post {
-                success {
-                    archiveArtifacts artifacts: '**/target/*.war'
-                }
+        }
+        stage ('test') {
+            steps {
+                echo 'Running tests'
+                sh 'mvn test'
             }
+        }
+    }
+    post {
+        success {
+            archiveArtifacts artifacts: '**/*.war'
         }
     }
 }
